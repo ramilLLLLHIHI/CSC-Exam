@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Service Mock Exam</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <div class="text-center">
+            <h1 class="csc-title">
+                <img src="ph.png" width="40" alt="PH"> CIVIL SERVICE COMMISSION
+            </h1>
+            <h2 class="exam-title">CIVIL SERVICE MOCK EXAM</h2>
+            <p class="subtitle">Practice for the Civil Service Examination</p>
+        </div>
+
+        <div class="row justify-content-center g-4 mt-2">
+            <!-- Professional Exam Card -->
+            <div class="col-md-5">
+                <div class="exam-card">
+                    <div class="card-header">
+                        <i class="fas fa-briefcase"></i>
+                        <h3>Professional Exam</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="exam-stats">
+                            <div class="stat">
+                                <i class="fas fa-question-circle"></i>
+                                <span class="stat-number">170</span>
+                                <span class="stat-label">Questions</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-layer-group"></i>
+                                <div class="stat-number-wrapper">
+                                    <span class="stat-number">4</span>
+                                    <ul class="tooltip-list">
+                                        <li>Verbal Ability 30%</li>
+                                        <li>Analytical Ability 35%</li>
+                                        <li>Numerical Ability 30%</li>
+                                        <li>General Knowledge 5%</li>
+                                    </ul>
+                                </div>
+                                <span class="stat-label">Sections</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span class="stat-number">3h 10m</span>
+                                <span class="stat-label">Time Limit</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn-start" onclick="openInstructions('professional')">
+                            <i class="fas fa-play" style="margin-right: 8px;"></i>Start Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-Professional Exam Card -->
+            <div class="col-md-5">
+                <div class="exam-card">
+                    <div class="card-header">
+                        <i class="fas fa-user-graduate"></i>
+                        <h3>Sub-Professional Exam</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="exam-stats">
+                            <div class="stat">
+                                <i class="fas fa-question-circle"></i>
+                                <span class="stat-number">165</span>
+                                <span class="stat-label">Questions</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-layer-group"></i>
+                                <div class="stat-number-wrapper">
+                                    <span class="stat-number">4</span>
+                                    <ul class="tooltip-list">
+                                        <li>Numerical Ability 30%</li>
+                                        <li>Clerical Ability 35%</li>
+                                        <li>Verbal Ability 30%</li>
+                                        <li>General Knowledge 5%</li>
+                                    </ul>
+                                </div>
+                                <span class="stat-label">Sections</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span class="stat-number">2h 40m</span>
+                                <span class="stat-label">Time Limit</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn-start" onclick="openInstructions('subprofessional')">
+                            <i class="fas fa-play" style="margin-right: 8px;"></i>Start Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div class="text-center footer-note">
+            <p><i class="fas fa-info-circle"></i> Choose your exam type to begin. Timer starts immediately.</p>
+        </div>
+    </div>
+
+    <!-- INSTRUCTION MODAL (Popup) -->
+    <div id="instructionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-clipboard-list"></i> General instructions</h2>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-proceed" id="proceedBtn">Start Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedExamType = '';
+        let selectedTimeMinutes = 0;
+        let selectedTotalQuestions = 0;
+        let selectedTimeDisplay = '';
+        let selectedQuestionsDisplay = 0;
+
+        function openInstructions(examType) {
+            // Add click feedback to button
+            const btns = document.querySelectorAll('.btn-start');
+            btns.forEach(btn => {
+                if (btn.textContent.includes('Start Exam')) {
+                    btn.style.transform = 'scale(0.95)';
+                    setTimeout(() => { btn.style.transform = ''; }, 150);
+                }
+            });
+
+            selectedExamType = examType;
+            
+            if (examType === 'professional') {
+                selectedTimeMinutes = 190;
+                selectedTotalQuestions = 170;
+                selectedTimeDisplay = '3 hours and 10 minutes';
+                selectedQuestionsDisplay = 170;
+            } else {
+                selectedTimeMinutes = 160;
+                selectedTotalQuestions = 165;
+                selectedTimeDisplay = '2 hours and 40 minutes';
+                selectedQuestionsDisplay = 165;
+            }
+            
+            updateModalContent();
+            document.getElementById('instructionModal').style.display = 'flex';
+        }
+
+        function updateModalContent() {
+            document.getElementById('modalBody').innerHTML = `
+                <div class="instruction-section">
+                    <h4> TIME LIMIT</h4>
+                    <p>You have <strong>${selectedTimeDisplay}</strong> to complete all <strong>${selectedQuestionsDisplay}</strong> questions.</p>
+                    <ul class="checkbox-list">
+                        <li><i class="fas fa-exclamation-triangle"></i> Timer starts automatically and cannot be paused.</li>
+                    </ul>
+                </div>
+                <div class="instruction-section">
+                    <h4>HOW TO ANSWER</h4>
+                    <ul class="checkbox-list">
+                        <li><i class="fas fa-check-square"></i> Read each question carefully, then click your chosen answer (A–E).</li>
+                        <li><i class="fas fa-check-square"></i> Use Next / Previous to navigate. You can jump between sections anytime.</li>
+                        <li><i class="fas fa-check-square"></i> All answers are auto-saved. No need to save manually.</li>
+                        <li><i class="fas fa-check-square"></i> Use the Flag button to mark difficult questions for review.</li>
+                    </ul>
+                    <div class="passing-note">
+                        </i> Passing score is 80%. Results are shown immediately after submission.
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            document.getElementById('instructionModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            let modal = document.getElementById('instructionModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Proceed to exam
+        document.getElementById('proceedBtn').addEventListener('click', function() {
+            localStorage.setItem('examType', selectedExamType);
+            localStorage.setItem('totalQuestions', selectedTotalQuestions);
+            localStorage.setItem('timeMinutes', selectedTimeMinutes);
+            localStorage.setItem('timeDisplay', selectedTimeDisplay);
+            window.location.href = 'exam.html';
+        });
+    </script>
+</body>
+</html>

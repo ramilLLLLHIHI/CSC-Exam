@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSC Mock Exam | Taking Exam</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="exam-style.css">
+<base target="_blank">
+</head>
+<body>
+<div id="examContainer" class="exam-container">
+    <!-- Header -->
+    <div class="exam-header">
+        <div class="logo-area">
+            <img src="ph.png" alt="CSC">
+            <span>CSC MOCK EXAM</span>
+        </div>
+        <div class="timer-area">
+            <i class="fas fa-clock"></i>
+            <span id="timer">00:00:00</span>
+        </div>
+        <button class="exit-btn" onclick="exitExam()">
+            <i class="fas fa-sign-out-alt"></i> Exit
+        </button>
+    </div>
+
+    <div class="exam-body">
+        <!-- Sidebar - Exam Mode -->
+        <div id="sectionSidebar">
+            <div class="section-list" id="sectionList"></div>
+        </div>
+
+        <!-- Sidebar - Results Mode -->
+        <div id="resultSidebar">
+            <h3> Results</h3>
+            <button class="sidebar-result-btn btn-sidebar-home" id="sidebarHomeBtn">
+                <i class="fas fa-home"></i> Home
+            </button>
+            <button class="sidebar-result-btn btn-sidebar-review" id="sidebarReviewBtn">
+                <i class="fas fa-clipboard-list"></i> Review
+            </button>
+            <button class="sidebar-result-btn btn-sidebar-retake" id="sidebarRetakeBtn">
+                <i class="fas fa-redo"></i> Retake
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="examView">
+            <div class="question-header">
+                <h3 id="sectionTitle">Loading...</h3>
+                <p id="questionCounter">Question 1 of 0</p>
+            </div>
+            <div class="question-text" id="questionText">Loading questions...</div>
+            <div class="options-container" id="optionsContainer"></div>
+            <div class="action-buttons">
+                <button class="btn-flag" id="flagBtn"><i class="fas fa-flag"></i> Flag</button>
+                <button class="btn-prev" id="prevBtn"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="btn-next" id="nextBtn">Next <i class="fas fa-arrow-right"></i></button>
+                <button class="btn-submit" id="submitBtn"><i class="fas fa-check-circle"></i> Submit</button>
+            </div>
+        </div>
+
+        <!-- Results View -->
+        <div class="results-view" id="resultsView">
+            <div id="resultsContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== MODALS ========== -->
+
+<!-- Review Popup Modal -->
+<div id="reviewModal" class="modal-review">
+    <div class="modal-review-content">
+        <div class="modal-review-header">
+            <h2><i class="fas fa-clipboard-list"></i> Review</h2>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="flagged">🚩 Flagged</button>
+                <button class="filter-btn" data-filter="wrong">❌ Wrong</button>
+            </div>
+            <button class="modal-review-close" id="closeReviewModal">&times;</button>
+        </div>
+        <div class="modal-review-body">
+            <div class="questions-list" id="reviewQuestionsList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Submit Modal -->
+<div id="submitModal" class="modal-small">
+    <div class="modal-small-content">
+        <h3>Submit Exam?</h3>
+        <p>You answered <span id="answeredCount">0</span> of <span id="totalCount">0</span> questions.</p>
+        <div class="modal-small-buttons">
+            <button class="btn-cancel-modal" id="cancelSubmitBtn">Cancel</button>
+            <button class="btn-confirm" id="confirmSubmitBtn">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Exit Modal -->
+<div id="exitModal" class="modal-small">
+    <div class="modal-small-content">
+        <h3>Exit Exam?</h3>
+        <p>Your progress will be saved.</p>
+        <div class="modal-small-buttons">
+            <button class="btn-cancel-modal" id="cancelExitBtn">Cancel</button>
+            <button class="btn-confirm" id="confirmExitBtn">Save & Exit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Home Save & Exit Modal -->
+<div id="homeExitModal" class="modal-small">
+    <div class="modal-small-content">
+        <h3>Save & Exit?</h3>
+        <p>You can resume later.</p>
+        <div class="modal-small-buttons">
+            <button class="btn-cancel-modal" id="cancelHomeExitBtn">Cancel</button>
+            <button class="btn-confirm" id="confirmHomeExitBtn">Save & Exit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Restart Modal -->
+<div id="restartModal" class="modal-small">
+    <div class="modal-small-content">
+        <h3>⚠️ Delete All Progress?</h3>
+        <p>This cannot be undone!</p>
+        <div class="modal-small-buttons">
+            <button class="btn-cancel-modal" id="cancelRestartBtn">Cancel</button>
+            <button class="btn-danger" id="confirmRestartBtn">Delete Everything</button>
+        </div>
+    </div>
+</div>
+
+<script src="exam-data.js"></script>
+<script>
+    let currentExamData = null, currentSection = null, currentQuestionIndex = 0, currentSectionKey = null;
+    let answers = {}, flaggedQuestions = {}, timer = null, timeRemaining = 0;
+    let allQuestionsList = [];
+    
+    const examType = localStorage.getItem('examType');
+    const totalQuestions = parseInt(localStorage.getItem('totalQuestions'));
+    const timeMinutes = parseInt(localStorage.getItem('timeMinutes'));
+    
+    
+    if (examType === 'professional') { currentExamData = professionalData; }
+    else if (examType === 'subprofessional') { 
+        currentExamData = subProfessionalData; 
+    } else { 
+        alert("Exam type not found!"); 
+        window.location.href = 'index.html'; 
+    }
+    
+    
+    const sectionsList = Object.keys(currentExamData.sections).map(key => ({ key: key, ...currentExamData.sections[key] }));
+    
+    for (const [sectionKey, section] of Object.entries(currentExamData.sections)) {
+        allQuestionsList = allQuestionsList.concat(section.questions);
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => { initializeExam(); setupEventListeners(); startTimer(); updateSidebar(); });
+    
+    function initializeExam() {
+        if (!currentExamData || !currentExamData.sections) { document.getElementById('questionText').innerHTML = "ERROR: Exam data not loaded!"; return; }
+        const sectionKeys = Object.keys(currentExamData.sections);
+        currentSectionKey = sectionKeys[0];
+        currentSection = currentExamData.sections[currentSectionKey];
+        currentQuestionIndex = 0;
+        loadSavedAnswers(); loadFlaggedQuestions(); displayCurrentQuestion();
+        document.getElementById('totalCount').innerText = totalQuestions;
+    }
+    
+    function loadSavedAnswers() { const saved = localStorage.getItem(`${examType}_answers`); if (saved) answers = JSON.parse(saved); }
+    function saveAnswers() { localStorage.setItem(`${examType}_answers`, JSON.stringify(answers)); }
+    function loadFlaggedQuestions() { const saved = localStorage.getItem(`${examType}_flagged`); if (saved) flaggedQuestions = JSON.parse(saved); }
+    function saveFlaggedQuestions() { localStorage.setItem(`${examType}_flagged`, JSON.stringify(flaggedQuestions)); }
+    
+    function displayCurrentQuestion() {
+        if (!currentSection || !currentSection.questions || currentSection.questions.length === 0) { document.getElementById('questionText').innerHTML = "No questions found."; return; }
+        const question = currentSection.questions[currentQuestionIndex];
+        if (!question) return;
+        document.getElementById('sectionTitle').innerText = currentSection.name;
+        document.getElementById('questionCounter').innerHTML = `Question ${currentQuestionIndex + 1} of ${currentSection.count}`;
+        document.getElementById('questionText').innerHTML = question.text;
+        const optionsContainer = document.getElementById('optionsContainer');
+        const prefixes = ['A', 'B', 'C', 'D', 'E'];
+        optionsContainer.innerHTML = '';
+        question.options.forEach((option, idx) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option-card';
+            if (answers[question.id] === idx) optionDiv.classList.add('selected');
+            optionDiv.innerHTML = `<div class="option-prefix">${prefixes[idx]}</div><div class="option-text">${option}</div>`;
+            optionDiv.addEventListener('click', () => selectAnswer(idx));
+            optionsContainer.appendChild(optionDiv);
+        });
+        const flagBtn = document.getElementById('flagBtn');
+        if (flaggedQuestions[question.id]) { flagBtn.classList.add('active'); flagBtn.innerHTML = '<i class="fas fa-flag"></i> Flagged'; }
+        else { flagBtn.classList.remove('active'); flagBtn.innerHTML = '<i class="fas fa-flag"></i> Flag'; }
+        document.getElementById('prevBtn').disabled = (currentQuestionIndex === 0);
+        const nextBtn = document.getElementById('nextBtn');
+        if (currentQuestionIndex === currentSection.count - 1) nextBtn.innerHTML = 'Next Section <i class="fas fa-forward"></i>';
+        else nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
+        updateSectionProgress(); updateSidebar();
+    }
+    
+    function getCurrentQuestionId() { return currentSection?.questions[currentQuestionIndex]?.id; }
+    function selectAnswer(answerIndex) { const questionId = getCurrentQuestionId(); if (questionId) { answers[questionId] = answerIndex; saveAnswers(); displayCurrentQuestion(); } }
+    function nextQuestion() {
+        if (currentQuestionIndex < currentSection.count - 1) { currentQuestionIndex++; displayCurrentQuestion(); }
+        else {
+            const currentIdx = sectionsList.findIndex(s => s.key === currentSectionKey);
+            if (currentIdx < sectionsList.length - 1) {
+                const nextSection = sectionsList[currentIdx + 1];
+                currentSectionKey = nextSection.key;
+                currentSection = currentExamData.sections[currentSectionKey];
+                currentQuestionIndex = 0;
+                displayCurrentQuestion();
+            } else { openSubmitModal(); }
+        }
+    }
+    function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; displayCurrentQuestion(); } }
+    function flagCurrentQuestion() { const questionId = getCurrentQuestionId(); if (flaggedQuestions[questionId]) delete flaggedQuestions[questionId]; else flaggedQuestions[questionId] = true; saveFlaggedQuestions(); displayCurrentQuestion(); updateSidebar(); }
+    function changeSection(sectionKey) { currentSectionKey = sectionKey; currentSection = currentExamData.sections[sectionKey]; currentQuestionIndex = 0; displayCurrentQuestion(); }
+    
+    function updateSectionProgress() {
+        let answeredCount = 0;
+        currentSection.questions.forEach(q => { if (answers[q.id] !== undefined) answeredCount++; });
+        const percentage = (answeredCount / currentSection.count) * 100;
+        const sectionElement = document.querySelector(`.section-item[data-section="${currentSectionKey}"]`);
+        if (sectionElement) {
+            const progressFill = sectionElement.querySelector('.progress-bar-fill');
+            if (progressFill) progressFill.style.width = `${percentage}%`;
+            const progressText = sectionElement.querySelector('.section-progress');
+            if (progressText) progressText.innerText = `${answeredCount}/${currentSection.count} answered`;
+        }
+    }
+    
+    function updateSidebar() {
+        const sidebar = document.getElementById('sectionList');
+        sidebar.innerHTML = '';
+        const iconMap = { verbal: 'fa-book', numerical: 'fa-calculator', analytical: 'fa-brain', generalInfo: 'fa-info-circle' };
+        sectionsList.forEach(section => {
+            let answeredCount = 0;
+            section.questions.forEach(q => { if (answers[q.id] !== undefined) answeredCount++; });
+            const percentage = (answeredCount / section.count) * 100;
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = `section-item ${currentSectionKey === section.key ? 'active' : ''}`;
+            sectionDiv.setAttribute('data-section', section.key);
+            sectionDiv.onclick = () => changeSection(section.key);
+            sectionDiv.innerHTML = `<div class="section-name"><i class="fas ${iconMap[section.key] || 'fa-folder'}"></i>${section.name}</div><div class="section-progress">${answeredCount}/${section.count} answered</div><div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${percentage}%"></div></div>`;
+            sidebar.appendChild(sectionDiv);
+        });
+    }
+    
+    function startTimer() {
+        timeRemaining = timeMinutes * 60;
+        updateTimerDisplay();
+        timer = setInterval(() => {
+            if (timeRemaining <= 0) { clearInterval(timer); alert("Time's up! Submitting..."); submitExam(); }
+            else { timeRemaining--; updateTimerDisplay(); }
+        }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+        const hours = Math.floor(timeRemaining / 3600);
+        const minutes = Math.floor((timeRemaining % 3600) / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById('timer').textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        if (timeRemaining === 300) alert('⚠️ 5 minutes remaining!');
+    }
+    
+    function openSubmitModal() { 
+        const answeredCount = Object.keys(answers).length;
+        document.getElementById('answeredCount').innerText = answeredCount;
+        document.getElementById('submitModal').style.display = 'flex'; 
+    }
+    function closeSubmitModal() { document.getElementById('submitModal').style.display = 'none'; }
+    
+    function submitExam() { 
+        closeSubmitModal();
+        clearInterval(timer); 
+        saveAnswers(); 
+        saveFlaggedQuestions(); 
+        showResults(); 
+    }
+    
+    function showResults() {
+        let totalWeightedScore = 0;
+        const sectionResults = [];
+        const sectionIcons = { verbal: 'fa-book', numerical: 'fa-calculator', analytical: 'fa-brain', generalInfo: 'fa-info-circle' };
+        
+        for (const [sectionKey, section] of Object.entries(currentExamData.sections)) {
+            let correctCount = 0;
+            section.questions.forEach(q => {
+                const userAnswer = answers[q.id];
+                if (userAnswer !== undefined && userAnswer === q.correct) correctCount++;
+            });
+            const sectionPercentage = (correctCount / section.count) * 100;
+            const weightedContribution = (sectionPercentage * section.weight) / 100;
+            totalWeightedScore += weightedContribution;
+            sectionResults.push({ 
+                key: sectionKey,
+                name: section.name, 
+                correct: correctCount, 
+                total: section.count, 
+                weight: section.weight, 
+                weightedPercent: weightedContribution,
+                rawPercent: sectionPercentage
+            });
+        }
+        
+        const finalPercentage = totalWeightedScore;
+        const passed = finalPercentage >= 80;
+        
+        document.getElementById('sectionSidebar').style.display = 'none';
+        document.getElementById('resultSidebar').style.display = 'flex';
+        
+        let msg = passed ? 'Great job! You passed!' : 'Keep practicing! You need 80% to pass.';
+        
+        let html = `
+            <div class="results-card">
+                <div class="score" style="color: ${passed ? '#38a169' : '#e53e3e'};">${Math.round(finalPercentage)}%</div>
+                <div class="label">OVERALL</div>
+                <div class="message">${msg}</div>
+                <div class="badge ${passed ? 'pass' : 'fail'}">${passed ? '✅ Passed' : '❌ Failed'}</div>
+            </div>
+            
+            <div class="section-breakdown">
+                <h4><i class="fas fa-chart-pie"></i> Section Breakdown</h4>
+                ${sectionResults.map(s => `
+                    <div class="section-row">
+                        <div class="row-top">
+                            <span class="name"><i class="fas ${sectionIcons[s.key] || 'fa-folder'}" style="color:#3b82f6;width:18px;"></i> ${s.name}</span>
+                            <div class="stats">
+                                <span class="pct ${s.weightedPercent === 0 ? 'red' : 'green'}">${s.weightedPercent.toFixed(1)}%</span>
+                                <span class="count">${s.correct}/${s.total}</span>
+                            </div>
+                        </div>
+                        <div class="correct-bar-container">
+                            <div class="correct-bar-bg">
+                                <div class="correct-bar-fill" style="width: ${(s.correct / s.total * 100).toFixed(1)}%"></div>
+                            </div>
+                            <span class="correct-bar-label">${s.correct}/${s.total}</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        document.getElementById('resultsContent').innerHTML = html;
+        document.getElementById('examView').style.display = 'none';
+        document.getElementById('resultsView').style.display = 'block';
+        
+        document.getElementById('sidebarHomeBtn').onclick = () => openHomeExitModal();
+        document.getElementById('sidebarReviewBtn').onclick = () => openReviewModal();
+        document.getElementById('sidebarRetakeBtn').onclick = () => openRestartModal();
+        
+        displayReviewQuestions('all');
+    }
+    
+    // ========== REVIEW MODAL ==========
+    function openReviewModal() {
+        document.getElementById('reviewModal').style.display = 'flex';
+        document.querySelectorAll('#reviewModal .filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === 'all');
+        });
+        displayReviewQuestions('all');
+    }
+    
+    function closeReviewModal() {
+        document.getElementById('reviewModal').style.display = 'none';
+    }
+    
+    function displayReviewQuestions(filter) {
+        const prefixes = ['A', 'B', 'C', 'D', 'E'];
+        const sectionIcons = { verbal: 'fa-book', numerical: 'fa-calculator', analytical: 'fa-brain', generalInfo: 'fa-info-circle' };
+        let filtered = [];
+
+        if (filter === 'all') filtered = allQuestionsList;
+        else if (filter === 'flagged') filtered = allQuestionsList.filter(q => flaggedQuestions[q.id]);
+        else if (filter === 'wrong') filtered = allQuestionsList.filter(q => {
+            const u = answers[q.id];
+            return u !== undefined && u !== q.correct;
+        });
+
+        document.querySelectorAll('#reviewModal .filter-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.filter === filter);
+        });
+
+        let html = '';
+        if (filtered.length === 0) {
+            html = '<div class="no-questions">No questions to display.</div>';
+        } else {
+            filtered.forEach(q => {
+                const u = answers[q.id];
+                const isCorrect = u !== undefined && u === q.correct;
+                const isFlagged = flaggedQuestions[q.id];
+
+                // Determine status
+                let statusClass = 'wrong-status';
+                let statusText = '✗ Incorrect';
+                if (isCorrect) { statusClass = 'correct-status'; statusText = '✓ Correct'; }
+                else if (isFlagged) { statusClass = 'flagged-status'; statusText = '🚩 Flagged'; }
+                else if (u === undefined) { statusText = '⚠ Not Answered'; }
+
+                // Find which section this question belongs to
+                let sectionName = 'Unknown';
+                let sectionKey = '';
+                for (const [sk, section] of Object.entries(currentExamData.sections)) {
+                    if (section.questions.find(sq => sq.id === q.id)) {
+                        sectionName = section.name;
+                        sectionKey = sk;
+                        break;
+                    }
+                }
+
+                // Build options HTML
+                let optionsHtml = '';
+                q.options.forEach((option, idx) => {
+                    let optClass = 'unselected';
+                    let badge = '';
+
+                    if (idx === q.correct) {
+                        optClass = 'is-correct';
+                        badge = '<span class="review-option-badge">✓ CORRECT</span>';
+                    } else if (idx === u && !isCorrect) {
+                        optClass = 'user-wrong';
+                        badge = '<span class="review-option-badge">YOUR ANSWER</span>';
+                    }
+
+                    optionsHtml += `
+                        <div class="review-option ${optClass}">
+                            <div class="review-option-prefix">${prefixes[idx]}</div>
+                            <div class="review-option-text">${option}</div>
+                            ${badge}
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="review-item ${isCorrect ? 'correct' : 'wrong'}">
+                        <div class="review-item-header">
+                            <span class="review-section-badge">
+                                <i class="fas ${sectionIcons[sectionKey] || 'fa-folder'}"></i> ${sectionName}
+                            </span>
+                            <span class="review-status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="review-question-text">Q${q.id}: ${q.text}</div>
+                        <div class="review-options">
+                            ${optionsHtml}
+                        </div>
+                        <div class="review-explanation">
+                            <div class="review-explanation-title">
+                                <i class="fas fa-lightbulb"></i> Explanation:
+                            </div>
+                            <div class="review-explanation-rationale">${q.explanation}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        document.getElementById('reviewQuestionsList').innerHTML = html;
+    }
+    
+    // ========== MODALS ==========
+    function openHomeExitModal() { document.getElementById('homeExitModal').style.display = 'flex'; }
+    function closeHomeExitModal() { document.getElementById('homeExitModal').style.display = 'none'; }
+    function saveAndExitToHome() { saveAnswers(); saveFlaggedQuestions(); window.location.href = 'index.html'; }
+    
+    function openRestartModal() { document.getElementById('restartModal').style.display = 'flex'; }
+    function closeRestartModal() { document.getElementById('restartModal').style.display = 'none'; }
+    function confirmRestart() { closeRestartModal(); localStorage.removeItem(`${examType}_answers`); localStorage.removeItem(`${examType}_flagged`); window.location.href = 'index.html'; }
+    
+    function openExitModal() { document.getElementById('exitModal').style.display = 'flex'; }
+    function closeExitModal() { document.getElementById('exitModal').style.display = 'none'; }
+    function exitAndSave() { saveAnswers(); saveFlaggedQuestions(); window.location.href = 'index.html'; }
+    function exitExam() { openExitModal(); }
+    
+    function setupEventListeners() {
+        document.getElementById('prevBtn').addEventListener('click', prevQuestion);
+        document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+        document.getElementById('flagBtn').addEventListener('click', flagCurrentQuestion);
+        document.getElementById('submitBtn').addEventListener('click', openSubmitModal);
+        document.getElementById('cancelSubmitBtn').addEventListener('click', closeSubmitModal);
+        document.getElementById('confirmSubmitBtn').addEventListener('click', submitExam);
+        document.getElementById('cancelExitBtn').addEventListener('click', closeExitModal);
+        document.getElementById('confirmExitBtn').addEventListener('click', exitAndSave);
+        document.getElementById('cancelHomeExitBtn').addEventListener('click', closeHomeExitModal);
+        document.getElementById('confirmHomeExitBtn').addEventListener('click', saveAndExitToHome);
+        document.getElementById('cancelRestartBtn').addEventListener('click', closeRestartModal);
+        document.getElementById('confirmRestartBtn').addEventListener('click', confirmRestart);
+        
+        document.getElementById('closeReviewModal').addEventListener('click', closeReviewModal);
+        document.getElementById('reviewModal').addEventListener('click', function(e) {
+            if (e.target === this) closeReviewModal();
+        });
+        
+        document.querySelectorAll('#reviewModal .filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                displayReviewQuestions(this.dataset.filter);
+            });
+        });
+    }
+</script>
+</body>
+</html>
