@@ -1444,3 +1444,360 @@ body {
         padding: 5px 12px;
     }
 }
+/* ======================================== */
+/* MOBILE RESPONSIVENESS - EXAM PAGE */
+/* ======================================== */
+
+/* Tablets and smaller laptops */
+@media (max-width: 1024px) {
+    #sectionSidebar,
+    #resultSidebar {
+        width: 200px;
+    }
+    
+    .main-content {
+        padding: 20px 24px;
+    }
+}
+
+/* Tablets (portrait) */
+@media (max-width: 768px) {
+    .exam-header {
+        padding: 8px 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .logo-area {
+        font-size: 0.85rem;
+    }
+    
+    .logo-area img {
+        width: 28px;
+    }
+    
+    .timer-area {
+        font-size: 0.85rem;
+        padding: 4px 12px;
+    }
+    
+    .exit-btn {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+    }
+    
+    .exam-body {
+        flex-direction: column;
+    }
+    
+    #sectionSidebar,
+    #resultSidebar {
+        width: 100%;
+        height: auto;
+        max-height: 120px;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 10px 12px;
+        overflow-y: auto;
+        flex-direction: row;
+    }
+    
+    .section-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .section-item {
+        padding: 8px 12px;
+        flex: 0 0 auto;
+        min-width: 100px;
+    }
+    
+    .section-name {
+        font-size: 0.7rem;
+    }
+    
+    .section-progress {
+        font-size: 0.6rem;
+    }
+    
+    .main-content {
+        padding: 16px;
+    }
+    
+    .question-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    
+    .question-header h3 {
+        font-size: 1rem;
+    }
+    
+    .question-header p {
+        font-size: 0.75rem;
+    }
+    
+    .question-text {
+        font-size: 0.95rem;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+    }
+    
+    .options-container {
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+    
+    .option-card {
+        padding: 10px 14px;
+        gap: 10px;
+    }
+    
+    .option-prefix {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+    }
+    
+    .option-text {
+        font-size: 0.85rem;
+    }
+    
+    .action-buttons {
+        gap: 8px;
+    }
+    
+    .btn-flag,
+    .btn-prev,
+    .btn-next {
+        padding: 8px 14px;
+        font-size: 0.75rem;
+    }
+    
+    .btn-submit {
+        padding: 8px 14px;
+        font-size: 0.75rem;
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .modal-review-content {
+        width: 95%;
+    }
+    
+    .modal-review-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .modal-review-header .filter-buttons {
+        flex-wrap: wrap;
+    }
+    
+    .modal-review-header .filter-btn {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+    }
+    
+    .review-item .q {
+        font-size: 0.8rem;
+    }
+    
+    .review-item .compare {
+        font-size: 0.7rem;
+        gap: 10px;
+    }
+    
+    .review-item .explain {
+        font-size: 0.7rem;
+    }
+    
+    /* Results page */
+    .results-card,
+    .results-section {
+        padding: 16px;
+    }
+    
+    .results-card .score {
+        font-size: 2.5rem;
+    }
+    
+    .section-row {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    
+    .section-row .stats {
+        gap: 10px;
+    }
+    
+    .modal-small-content {
+        padding: 20px;
+        width: 95%;
+    }
+    
+    .modal-small-content h3 {
+        font-size: 1rem;
+    }
+    
+    .modal-small-content p {
+        font-size: 0.8rem;
+    }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+    .exam-header {
+        padding: 6px 10px;
+    }
+    
+    .logo-area {
+        font-size: 0.7rem;
+    }
+    
+    .logo-area img {
+        width: 22px;
+    }
+    
+    .logo-area span {
+        font-size: 0.7rem;
+    }
+    
+    .timer-area {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+    
+    .timer-area i {
+        margin-right: 4px;
+    }
+    
+    .exit-btn {
+        padding: 4px 10px;
+        font-size: 0.6rem;
+    }
+    
+    #sectionSidebar,
+    #resultSidebar {
+        max-height: 80px;
+        padding: 6px 8px;
+    }
+    
+    .section-item {
+        padding: 4px 8px;
+        min-width: 70px;
+    }
+    
+    .section-name {
+        font-size: 0.6rem;
+    }
+    
+    .section-progress {
+        font-size: 0.5rem;
+    }
+    
+    .progress-bar-bg {
+        height: 3px;
+    }
+    
+    .main-content {
+        padding: 10px;
+    }
+    
+    .question-header h3 {
+        font-size: 0.85rem;
+    }
+    
+    .question-header p {
+        font-size: 0.65rem;
+    }
+    
+    .question-text {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+    }
+    
+    .option-card {
+        padding: 8px 10px;
+        gap: 8px;
+        border-radius: 8px;
+    }
+    
+    .option-prefix {
+        width: 20px;
+        height: 20px;
+        font-size: 0.6rem;
+    }
+    
+    .option-text {
+        font-size: 0.75rem;
+    }
+    
+    .btn-flag,
+    .btn-prev,
+    .btn-next {
+        padding: 6px 10px;
+        font-size: 0.65rem;
+        border-radius: 8px;
+    }
+    
+    .btn-submit {
+        padding: 8px 10px;
+        font-size: 0.7rem;
+    }
+    
+    .modal-review-header h2 {
+        font-size: 0.9rem;
+    }
+    
+    .modal-review-header .filter-btn {
+        font-size: 0.6rem;
+        padding: 3px 8px;
+    }
+    
+    .review-item {
+        padding: 8px 10px;
+    }
+    
+    .review-item .q {
+        font-size: 0.7rem;
+    }
+    
+    .review-item .compare {
+        font-size: 0.65rem;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .review-item .explain {
+        font-size: 0.65rem;
+        padding: 4px 8px;
+    }
+    
+    .results-card .score {
+        font-size: 2rem;
+    }
+    
+    .results-card .badge {
+        font-size: 0.7rem;
+        padding: 4px 12px;
+    }
+    
+    .section-row .name {
+        font-size: 0.75rem;
+    }
+    
+    .section-row .stats .pct {
+        font-size: 0.75rem;
+        min-width: 35px;
+    }
+    
+    .section-row .stats .count {
+        font-size: 0.7rem;
+        min-width: 40px;
+    }
+}
